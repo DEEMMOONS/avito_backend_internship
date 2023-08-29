@@ -3,6 +3,7 @@ package database
 import (
   "database/sql"
   _ "github.com/lib/pq"
+  "time"
 )
 
 func (serv *Server) checkSeg(segName string) (bool, error) {
@@ -47,30 +48,50 @@ func (serv *Server) removeSegment(segName string) error {
 }
 
 func (serv *Server) checkUser(id int, segName string) (bool, error) {
-  var status bool = true
-  rows, err := serv.db.Query("SELECT name FROM users WHERE id = $1 AND segment = $2 AND delete_at IS NULL", id, segName)
-  defer rows.Close()
+  var status bool = false
+  err := serv.db.QueryRow("SELECT name FROM users WHERE id = $1 AND segment = $2 AND (delete_at IS NULL OR delete_at > CURRENT_TIMESTAMP)", id, segName).Scan(segCheck)
   if err != nil {
-    return status, err
-  }
-  if rows.Next() {
-    status = false
+    if err == sql.ErrNoRows {
+      status = true
+    } else {
+      return status, err
+    }
   }
   return status, nil
 }
 
-func (serv *Server) addUser(id int, addSegs []string, delSegs []string) error {
+func (serv *Server) checkStatus (segName string, id int) (bool, bool, error) {
+  segStat, errSeg := serv.checkSeg(segName)
+  if errSeg != nil {
+      return false, false, errSeg
+  }
+  userStat, errUser := serv.checkUser(id, segName)
+  if errUser != nil {
+      return false, false, errUser
+  }
+  return userStat, segStat, nil
+}
+
+func (serv *Server) addUser(id int, addSegs []string, delSegs []string, delTime Time) error {
   for _, addSeg := range addSegs {
-    if !checkUser(db, id, addSeg) && !checkSeg(addSeg) {
-      _, err := serv.db.Exec("INSERT INTO users (id, segment, create_at, delete_at) VALUES ($1, $2, CURRENT_TIMESTAMP, $4)", id, addSeg, nil)
+    userStat, segStat, err := checkStatus(id, addSeg)
+    if err != nil {
+      return err
+    }
+    if userStat && !segStat(addSeg) {
+      _, err := serv.db.Exec("INSERT INTO users (id, segment, create_at, delete_at) VALUES ($1, $2, CURRENT_TIMESTAMP, $3)", id, addSeg, delTime)
       if err != nil {
         return err
       }
     }
   }
   for _, delSeg := range delSegs {
-    if checkUser(db, id, delSeg) && !checkSeg(delSeg) {
-      _, err := serv.db.Exec("UPDATE users SET deleate_at = CURRENT_TIMESTAMP WHERE id = $2 AND segment = $3", id, delSeg)
+    userStat, segStat, err := checkStatus(id, addSeg)
+    if err != nil {
+      return err
+    }
+    if !userStat && !segStat {
+      _, err := serv.db.Exec("UPDATE users SET deleate_at = CURRENT_TIMESTAMP WHERE id = $1 AND segment = $2", id, delSeg)
       if err != nil {
         return err
       }
@@ -80,7 +101,7 @@ func (serv *Server) addUser(id int, addSegs []string, delSegs []string) error {
 }
 
 func (serv *Server) getSegments(id int) (string, error) {
-  rows, err := serv.db.Query("SELECT segment FROM users WHERE id = $1", id)
+  rows, err := serv.db.Query("SELECT segment FROM users WHERE id = $1 AND (delete_at IS NULL OR delete_at > CURRENT_TIMESTAMP)", id)
   if err != nil {
     return "", err
   }
