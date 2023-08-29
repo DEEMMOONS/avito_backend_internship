@@ -1,0 +1,7 @@
+{
+  "address": "",
+  "port": "80", 
+  "db": "avitoUsers",
+  "user": "admin",
+  "password": "admin"
+}
