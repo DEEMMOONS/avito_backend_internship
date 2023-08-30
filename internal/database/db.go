@@ -133,7 +133,7 @@ func GetUserStat(db *sql.DB, id int, checkInterval time.Time) ([]string, error) 
     if bufAdd.After(checkInterval) {
       stat = append(stat, strconv.Itoa(id) + ";" + bufSeg + ";Add;" + bufAdd.Format("2006-01-02 15:04:05"))
     }
-    if bufDel.After(checkInterval) {
+    if bufDel != nil && bufDel.After(checkInterval) {
       stat = append(stat, strconv.Itoa(id) + ";" + bufSeg + ";Delete;" + bufDel.Format("2006-01-02 15:04:05"))
     }
   }
