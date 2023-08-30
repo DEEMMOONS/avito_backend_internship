@@ -19,13 +19,13 @@ func (serv *Server) checkSeg(segName string) (bool, error) {
   return status, nil
 }
 
-func (serv *Server) addSegment(segName string) error {
+func (serv *Server) AddSegment(segName string) error {
   check, err := serv.checkSeg(segName)
   if err != nil {
     return err
   }
   if (check) {
-    _, err := serv.db.Exec("INSERT INTO segments VALUES ($1)", segName)
+    _, err := serv.db.Exec("INSERT INTO segments (name) VALUES ($1)", segName)
     if err != nil {
       return err
     }
@@ -33,7 +33,7 @@ func (serv *Server) addSegment(segName string) error {
   return nil
 }
 
-func (serv *Server) removeSegment(segName string) error {
+func (serv *Server) DelSegment(segName string) error {
   check, err := serv.checkSeg(segName)
   if err != nil {
     return err
@@ -72,7 +72,7 @@ func (serv *Server) checkStatus (segName string, id int) (bool, bool, error) {
   return userStat, segStat, nil
 }
 
-func (serv *Server) addUser(id int, addSegs []string, delSegs []string, delTime Time) error {
+func (serv *Server) AddUser(id int, addSegs []string, delSegs []string, delTime Time) error {
   for _, addSeg := range addSegs {
     userStat, segStat, err := checkStatus(id, addSeg)
     if err != nil {
@@ -100,7 +100,7 @@ func (serv *Server) addUser(id int, addSegs []string, delSegs []string, delTime 
   return nil
 }
 
-func (serv *Server) getSegments(id int) (string, error) {
+func (serv *Server) GetSegments(id int) (string, error) {
   rows, err := serv.db.Query("SELECT segment FROM users WHERE id = $1 AND (delete_at IS NULL OR delete_at > CURRENT_TIMESTAMP)", id)
   if err != nil {
     return "", err

@@ -32,7 +32,7 @@ func NewServer(cfgPath string) (*Server, error){
   return &Server {
     db: db,
     config: config
-    router: mu.NewRouter()
+    router: mux.NewRouter()
   }, nil
 }
 
@@ -45,7 +45,10 @@ func (serv *Server) Start() {
 }
 
 func (serv *Server) setRouter() {
-  http.Handle("/", serv.router)
+  serv.router.HandleFunc("/segments/add", serv.addSegment).Methods("POST")
+  serv.router.HandleFunc("/segments/delete", serv.delSegment).Methods("POST")
+  serv.router.HandleFunc("/users/add", serv.addUser).Methods("POST")
+  serv.router.HandleFunc("/users/get", serv.getSegments).Methods("POST")
 }
 
 func (serv *Server) getAddr() string {
