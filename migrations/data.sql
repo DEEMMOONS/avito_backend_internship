@@ -2,8 +2,8 @@ CREATE TABLE users
 (
   id BIGINT NOT NULL,
   segment VARCHAR,
-  create_at TIMESTEMP NOT NULL,
-  delete_at TIMESTEMP
+  create_at TIMESTAMP NOT NULL,
+  delete_at TIMESTAMP
 );
 
 CREATE TABLE segments
