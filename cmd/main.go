@@ -2,7 +2,7 @@ package main
 
 import (
     "log"
-  "https://github.com/DEEMMOONS/avito_backend_internship/internal/server"
+  "https://github.com/DEEMMOONS/avito_backend_internship/tree/main/internal/server"
 )
 
 func main() {
