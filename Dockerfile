@@ -9,6 +9,6 @@ RUN go build -o main cmd/main.go
 FROM alpine:latest
 
 COPY --from=builder . .
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["app/main"]
