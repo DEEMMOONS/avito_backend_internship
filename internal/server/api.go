@@ -3,6 +3,8 @@ package server
 import (
   "github.com/DEEMMOONS/avito_backend_internship/tree/develop/internal/database"
   "net/http"
+  "os"
+  "fmt"
 )
 
 func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
@@ -112,12 +114,34 @@ func (serv *Server) getUserStat(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  //result, err := database.GetUserStat(serv.db, inputData.id, inputData.time)
-  _, err := database.GetUserStat(serv.db, inputData.Id, inputData.Time)
+  result, err := database.GetUserStat(serv.db, inputData.Id, inputData.Time)
   if err != nil {
     internalServerError(w, err)
     return
   }
+  errCSV := makeCSV("temp.csv", result)
+  if errCSV != nil {
+    internalServerError(w, errCSV)
+    return
+  }
+  defer os.Remove("temp.csv")
+  link := fmt.Sprintf("http://%s/%s", r.Host, "temp.csv")
+  w.Header().Set("Content-Type", "application/json")
+  fmt.Fprintf(w, `{"csv_link": "%s"}`, link)
   respondSuccess(w)
-  //makeRespond(w, http.StatusOK, jsonRespond(result))
+}
+
+func makeCSV(name string, content []string) error {
+  file, err := os.Create(name)
+  if err != nil {
+    return err
+  }
+  defer file.Close()
+  for _, str := range content {
+    _, err2 := file.WriteString(str + "\n")
+    if err2 != nil {
+    return err2
+    }
+  }
+  return nil
 }

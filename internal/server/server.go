@@ -20,7 +20,7 @@ func NewServer(cfgPath string) (*Server, error){
 	if err != nil {
 		return nil, err
 	}
-  connStr := fmt.Sprintf("postgresql://%s:%s@postgres/%s?sslmode=disable", config.User, config.Password, config.DBname)
+  connStr := fmt.Sprintf("postgres://%s:%s@postgres/%s?sslmode=disable", config.User, config.Password, config.DBname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err

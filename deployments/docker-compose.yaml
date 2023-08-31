@@ -1,31 +1,26 @@
-version: '3.8'
-
+version: "3.9"
 services:
-  database:
-    image: postgres:alpine3.18
-    restart: always
+  postgres:
+    image: postgres:13.3
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: avito
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
+      POSTGRES_DB: "avito"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "admin"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
+      - ../database:/var/lib/postgresql/data
       - ../migrations/data.sql:/docker-entrypoint-initdb.d/init.sql
-      - pgdata:/var/lib/postgresql/data/pgdata
-  server:
-    build:
-      context: ..
-      dockerfile: ./Dockerfile
-    depends_on:
-      database:
-        condition: service_started
     ports:
-      - 80:80
-    volumes:
-      - csv:/some/path/to/mounted/volume
+      - "5432:5432"
 
-volumes:
-  pgdata:
-  csv:
+  server:
+    depends_on:
+      - "postgres"
+    build:
+      context: ../
+      dockerfile: deployments/Dockerfile
+    volumes:
+      - ../reports:/app/reports
+    restart: unless-stopped
+    ports:
+      - "80:80"
