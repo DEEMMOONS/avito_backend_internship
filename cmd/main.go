@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-  server, err := server.NewServer("../../configs")
+  server, err := server.NewServer("app/configs/config.json")
   if err != nil {
     log.Fatal(err)
   }

@@ -11,7 +11,7 @@ func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  check, err := database.CheckSeg(serv.db, inputData.name)
+  check, err := database.CheckSeg(serv.db, inputData.Name)
   if err != nil {
     internalServerError(w, err)
     return
@@ -20,7 +20,7 @@ func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
     invalidData(w)
     return
   }
-  err2 := database.AddSegment(serv.db, inputData.name)
+  err2 := database.AddSegment(serv.db, inputData.Name)
   if err2 != nil {
     internalServerError(w, err2)
     return
@@ -34,7 +34,7 @@ func (serv *Server) delSegment(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  check, err := database.CheckSeg(serv.db, inputData.name)
+  check, err := database.CheckSeg(serv.db, inputData.Name)
   if err != nil {
     internalServerError(w, err)
     return
@@ -43,7 +43,7 @@ func (serv *Server) delSegment(w http.ResponseWriter, r *http.Request) {
     invalidData(w)
     return
   }
-  err2 := database.DelSegment(serv.db, inputData.name)
+  err2 := database.DelSegment(serv.db, inputData.Name)
   if err2 != nil {
     internalServerError(w, err2)
     return
@@ -57,8 +57,8 @@ func (serv *Server) addUser(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  for _, addSeg := range inputData.addSegs {
-    userStat, segStat, err := database.CheckStatus(serv.db, addSeg, inputData.id )
+  for _, addSeg := range inputData.AddSegs {
+    userStat, segStat, err := database.CheckStatus(serv.db, addSeg, inputData.Id)
     if err != nil {
       internalServerError(w, err)
       return
@@ -68,23 +68,23 @@ func (serv *Server) addUser(w http.ResponseWriter, r *http.Request) {
       return
     }
   }
-  for _, delSeg := range inputData.delSegs {
-    userStat, segStat, err := database.CheckStatus(serv.db, delSeg, inputData.id)
+  for _, delSeg := range inputData.DelSegs {
+    userStat, err := database.CheckUser(serv.db, inputData.Id, delSeg)
     if err != nil {
       internalServerError(w, err)
       return
     }
-    if userStat || segStat {
+    if userStat {
       invalidData(w)
       return
     }
   }
-  err := database.AddUserSegs(serv.db, inputData.id, inputData.addSegs, inputData.delTime)
+  err := database.AddUserSegs(serv.db, inputData.Id, inputData.AddSegs, inputData.DelTime)
   if err != nil {
     internalServerError(w, err)
     return
   }
-  err2 := database.DelUserSegs(serv.db, inputData.id, inputData.delSegs)
+  err2 := database.DelUserSegs(serv.db, inputData.Id, inputData.DelSegs)
   if err2 != nil {
     internalServerError(w, err2)
     return
@@ -98,7 +98,7 @@ func (serv *Server) getSegments(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  result, err := database.GetSegments(serv.db, inputData.id)
+  result, err := database.GetSegments(serv.db, inputData.Id)
   if err != nil {
     internalServerError(w, err)
     return
@@ -113,7 +113,7 @@ func (serv *Server) getUserStat(w http.ResponseWriter, r *http.Request) {
     return
   }
   //result, err := database.GetUserStat(serv.db, inputData.id, inputData.time)
-  _, err := database.GetUserStat(serv.db, inputData.id, inputData.time)
+  _, err := database.GetUserStat(serv.db, inputData.Id, inputData.Time)
   if err != nil {
     internalServerError(w, err)
     return

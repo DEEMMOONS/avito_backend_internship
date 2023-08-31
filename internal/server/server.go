@@ -49,6 +49,7 @@ func (serv *Server) setRouter() {
   serv.router.HandleFunc("/segments/delete", serv.delSegment).Methods("POST")
   serv.router.HandleFunc("/users/add", serv.addUser).Methods("POST")
   serv.router.HandleFunc("/users/get", serv.getSegments).Methods("POST")
+  serv.router.HandleFunc("/users/get_stat", serv.getUserStat).Methods("POST")
 }
 
 func (serv *Server) getAddr() string {

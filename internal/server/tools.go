@@ -3,26 +3,25 @@ package server
 import (
   "encoding/json"
   "fmt"
-  "time"
   "log"
   "net/http"
   "io"
 )
 
 type segment struct {
-  name string `json:"slug"`
+  Name string `json:"slug"`
 }
 
 type data struct {
-  id int `json:"id"`
-  time  time.Time `json:"period,omitempty"`
+  Id int `json:"id"`
+  Time  string `json:"period,omitempty"`
 }
 
 type user struct {
-  id int `json:"id"`
-  addSegs []string `json:"add,omitempty"`
-  delSegs []string `json:"del,omitempty"`
-  delTime time.Time `json:"delete_time,omitempty"`
+  Id int `json:"id"`
+  AddSegs []string `json:"add,omitempty"`
+  DelSegs []string `json:"del,omitempty"`
+  DelTime string `json:"delete_time,omitempty"`
 }
 
 func getRequestData(w http.ResponseWriter, r *http.Request, v interface{}) bool {
