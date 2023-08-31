@@ -5,7 +5,6 @@ import (
   _ "github.com/lib/pq"
   "time"
   "strconv"
-  "fmt"
 )
 
 func CheckSeg(db *sql.DB, segName string) (bool, error) {
@@ -66,7 +65,6 @@ func CheckStatus (db *sql.DB, segName string, id int) (bool, bool, error) {
 
 func AddUserSegs(db *sql.DB, id int, addSegs []string, delTimeStr string) error {
   delTime, _ := time.Parse(time.RFC3339, delTimeStr)
-  fmt.Println(delTime)
   for _, addSeg := range addSegs {
     if delTime.IsZero() {
       _, err := db.Exec("INSERT INTO users (id, segment, create_at, delete_at) VALUES ($1, $2, $3, $4)", id, addSeg, time.Now().Round(time.Second), nil)
@@ -112,7 +110,7 @@ func GetSegments(db *sql.DB, id int) (string, error) {
 
 func GetUserStat(db *sql.DB, id int, checkIntervalStr string) ([]string, error) {
   checkInterval, _ := time.Parse(time.RFC3339, checkIntervalStr)
-  rows, err := db.Query("SELECT segment, create_at, delete_at FROM users WHERE id = $1 AND (create_at > $2 OR delete_at > $2)", id, checkInterval)
+  rows, err := db.Query("SELECT segment, create_at, delete_at FROM users WHERE id = $1 AND (create_at > $2 OR (delete_at IS NOT NILL AND delete_at > $2))", id, checkInterval)
   if err != nil {
     return nil, err
   }
@@ -120,11 +118,16 @@ func GetUserStat(db *sql.DB, id int, checkIntervalStr string) ([]string, error) 
   var stat []string
   for rows.Next() {
     var bufSeg, bufAddStr, bufDelStr string
-    bufAdd, _ := time.Parse("2006-01-02 15:04:05", bufAddStr)
-    bufDel, _ := time.Parse("2006-01-02 15:04:05", bufDelStr)
-    err := rows.Scan(&bufSeg, &bufAdd, &bufDel)
+    err := rows.Scan(&bufSeg, &bufAddStr, &bufDelStr)
     if err != nil {
       return nil, err
+    }
+    bufAdd, _ := time.Parse("2006-01-02 15:04:05", bufAddStr)
+    var bufDel time.Time
+    if bufDelStr != "" {
+      bufDel, _ = time.Parse("2006-01-02 15:04:05", bufDelStr)
+    } else {
+      bufDel = time.Time()
     }
     if bufAdd.After(checkInterval) {
       stat = append(stat, strconv.Itoa(id) + ";" + bufSeg + ";Add;" + bufAdd.Format("2006-01-02 15:04:05"))

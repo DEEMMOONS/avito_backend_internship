@@ -1,7 +1,7 @@
 package server
 
 import (
-  "github.com/DEEMMOONS/avito_backend_internship/tree/develop/internal/database"
+  "github.com/DEEMMOONS/avito_backend_internship/tree/main/internal/database"
   "net/http"
   "os"
   "fmt"
@@ -128,7 +128,6 @@ func (serv *Server) getUserStat(w http.ResponseWriter, r *http.Request) {
   link := fmt.Sprintf("http://%s/%s", r.Host, "temp.csv")
   w.Header().Set("Content-Type", "application/json")
   fmt.Fprintf(w, `{"csv_link": "%s"}`, link)
-  respondSuccess(w)
 }
 
 func makeCSV(name string, content []string) error {
