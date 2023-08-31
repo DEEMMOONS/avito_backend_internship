@@ -7,7 +7,7 @@ import (
   "strconv"
 )
 
-func checkSeg(db *sql.DB, segName string) (bool, error) {
+func CheckSeg(db *sql.DB, segName string) (bool, error) {
   var status bool = false
   err := db.QueryRow("SELECT name FROM segments WHERE name = $1", segName).Scan(segCheck)
   if err != nil {
@@ -21,34 +21,22 @@ func checkSeg(db *sql.DB, segName string) (bool, error) {
 }
 
 func AddSegment(db *sql.DB, segName string) error {
-  check, err := checkSeg(db, segName)
+  _, err := db.Exec("INSERT INTO segments (name) VALUES ($1)", segName)
   if err != nil {
     return err
-  }
-  if (check) {
-    _, err := db.Exec("INSERT INTO segments (name) VALUES ($1)", segName)
-    if err != nil {
-      return err
-    }
   }
   return nil
 }
 
 func DelSegment(db *sql.Db, segName string) error {
-  check, err := checkSeg(db, segName)
+  _, err := db.Exec("DELETE FROM segments WHERE name = $1", segName)
   if err != nil {
     return err
-  }
-  if (!check) {
-    _, err := db.Exec("DELETE FROM segments WHERE name = $1", segName)
-    if err != nil {
-      return err
-    }
   }
   return nil
 }
 
-func checkUser(db *sql.DB, id int, segName string) (bool, error) {
+func CheckUser(db *sql.DB, id int, segName string) (bool, error) {
   var status bool = false
   err := db.QueryRow("SELECT name FROM users WHERE id = $1 AND segment = $2 AND (delete_at IS NULL OR delete_at > CURRENT_TIMESTAMP)", id, segName).Scan(segCheck)
   if err != nil {
@@ -61,7 +49,7 @@ func checkUser(db *sql.DB, id int, segName string) (bool, error) {
   return status, nil
 }
 
-func checkStatus (db *sql.DB, segName string, id int) (bool, bool, error) {
+func CheckStatus (db *sql.DB, segName string, id int) (bool, bool, error) {
   segStat, errSeg := checkSeg(db, segName)
   if errSeg != nil {
       return false, false, errSeg
@@ -73,29 +61,20 @@ func checkStatus (db *sql.DB, segName string, id int) (bool, bool, error) {
   return userStat, segStat, nil
 }
 
-func AddUser(db *sql.DB, id int, addSegs []string, delSegs []string, delTime time.Time) error {
+func AddUserSegs(db *sql.DB, id int, addSegs []string, delTime time.Time) error {
   for _, addSeg := range addSegs {
-    userStat, segStat, err := checkStatus(db, id, addSeg)
+    _, err := db.Exec("INSERT INTO users (id, segment, create_at, delete_at) VALUES ($1, $2, CURRENT_TIMESTAMP, $3)", id, addSeg, delTime)
     if err != nil {
       return err
-    }
-    if userStat && !segStat(addSeg) {
-      _, err := db.Exec("INSERT INTO users (id, segment, create_at, delete_at) VALUES ($1, $2, CURRENT_TIMESTAMP, $3)", id, addSeg, delTime)
-      if err != nil {
-        return err
-      }
     }
   }
+  return nil
+}
+func DelUserSegs(db *sql.DB, id int, delSegs []string) error {
   for _, delSeg := range delSegs {
-    userStat, segStat, err := checkStatus(db, id, addSeg)
+    _, err := db.Exec("UPDATE users SET deleate_at = CURRENT_TIMESTAMP WHERE id = $1 AND segment = $2", id, delSeg)
     if err != nil {
       return err
-    }
-    if !userStat && !segStat {
-      _, err := db.Exec("UPDATE users SET deleate_at = CURRENT_TIMESTAMP WHERE id = $1 AND segment = $2", id, delSeg)
-      if err != nil {
-        return err
-      }
     }
   }
   return nil
