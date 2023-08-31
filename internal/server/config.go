@@ -6,14 +6,14 @@ import (
 )
 
 type config struct {
-  UsersDBname string `json:"db"`
+  DBname string `json:"db"`
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Address string `json:"address"`
 	Port    string `json:"port"`
 }
 
-func CreateConfig(path string) {
+func CreateConfig(path string) (*config, error) {
   data, err := os.ReadFile(path)
   if err != nil {
     return nil, err

@@ -1,10 +1,8 @@
 package server
 
 import (
-  "internal/database"
-  "io"
+  "github.com/DEEMMOONS/avito_backend_internship/tree/develop/internal/database"
   "net/http"
-  "time"
 )
 
 func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +11,7 @@ func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  check, err := CheckSeg(serv.db, inputData.name)
+  check, err := database.CheckSeg(serv.db, inputData.name)
   if err != nil {
     internalServerError(w, err)
     return
@@ -22,9 +20,9 @@ func (serv *Server) addSegment(w http.ResponseWriter, r *http.Request) {
     invalidData(w)
     return
   }
-  err := AddSegment(serv.db, inputData.name)
-  if err != nil {
-    internalServerError(w, err)
+  err2 := database.AddSegment(serv.db, inputData.name)
+  if err2 != nil {
+    internalServerError(w, err2)
     return
   }
   respondSuccess(w)
@@ -36,7 +34,7 @@ func (serv *Server) delSegment(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  check, err := CheckSeg(serv.db, inputData.name)
+  check, err := database.CheckSeg(serv.db, inputData.name)
   if err != nil {
     internalServerError(w, err)
     return
@@ -45,9 +43,9 @@ func (serv *Server) delSegment(w http.ResponseWriter, r *http.Request) {
     invalidData(w)
     return
   }
-  err := DelSegment(serv.db, inputData.name)
-  if err != nil {
-    internalServerError(w, err)
+  err2 := database.DelSegment(serv.db, inputData.name)
+  if err2 != nil {
+    internalServerError(w, err2)
     return
   }
   respondSuccess(w)
@@ -59,8 +57,8 @@ func (serv *Server) addUser(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  for _, addSeg := range inputiData.addSegs {
-    userStat, segStat, err := CheckStatus(serv.db, inputData.id, addSeg)
+  for _, addSeg := range inputData.addSegs {
+    userStat, segStat, err := database.CheckStatus(serv.db, addSeg, inputData.id )
     if err != nil {
       internalServerError(w, err)
       return
@@ -71,7 +69,7 @@ func (serv *Server) addUser(w http.ResponseWriter, r *http.Request) {
     }
   }
   for _, delSeg := range inputData.delSegs {
-    userStat, segStat, err := CheckStatus(serv.db, inputData.id, delSeg)
+    userStat, segStat, err := database.CheckStatus(serv.db, delSeg, inputData.id)
     if err != nil {
       internalServerError(w, err)
       return
@@ -81,14 +79,14 @@ func (serv *Server) addUser(w http.ResponseWriter, r *http.Request) {
       return
     }
   }
-  err := AddUserSegs(serv.db, inputData.id, inputData.addSegs, inputData.delTime)
+  err := database.AddUserSegs(serv.db, inputData.id, inputData.addSegs, inputData.delTime)
   if err != nil {
     internalServerError(w, err)
     return
   }
-  err := DelUserSegs(serv.db, inputData.id, inputData.delSegs)
-  if err != nil {
-    internalServerError(w, err)
+  err2 := database.DelUserSegs(serv.db, inputData.id, inputData.delSegs)
+  if err2 != nil {
+    internalServerError(w, err2)
     return
   }
   respondSuccess(w)
@@ -100,12 +98,12 @@ func (serv *Server) getSegments(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  result, err := GetSegments(serv.db, inputData.id)
+  result, err := database.GetSegments(serv.db, inputData.id)
   if err != nil {
     internalServerError(w, err)
     return
   }
-  makeRespond(w, http.StatusOK, jsonResult(result))
+  makeRespond(w, http.StatusOK, jsonRespond(result))
 }
 
 func (serv *Server) getUserStat(w http.ResponseWriter, r *http.Request) {
@@ -114,10 +112,12 @@ func (serv *Server) getUserStat(w http.ResponseWriter, r *http.Request) {
   if !status {
     return
   }
-  result, err := GetUserStat(serv.db, inputData.id, inputData.checkInterval)
+  //result, err := database.GetUserStat(serv.db, inputData.id, inputData.time)
+  _, err := database.GetUserStat(serv.db, inputData.id, inputData.time)
   if err != nil {
     internalServerError(w, err)
     return
   }
-  makeRespond(w, http.StatusOK, jsonResult(result))
+  respondSuccess(w)
+  //makeRespond(w, http.StatusOK, jsonRespond(result))
 }

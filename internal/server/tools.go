@@ -6,6 +6,7 @@ import (
   "time"
   "log"
   "net/http"
+  "io"
 )
 
 type segment struct {
@@ -21,7 +22,7 @@ type user struct {
   id int `json:"id"`
   addSegs []string `json:"add,omitempty"`
   delSegs []string `json:"del,omitempty"`
-  deltime time.Time `json:"delete_time,omitempty"`
+  delTime time.Time `json:"delete_time,omitempty"`
 }
 
 func getRequestData(w http.ResponseWriter, r *http.Request, v interface{}) bool {
@@ -48,7 +49,7 @@ func internalServerError(w http.ResponseWriter, err error) {
 }
 
 func invalidData(w http.ResponseWriter) {
-	makeJsonRespond(w, http.StatusBadRequest, jsonRespond("invalid data"))
+	makeRespond(w, http.StatusBadRequest, jsonRespond("invalid data"))
 }
 
 func jsonRespond(respond string) []byte {

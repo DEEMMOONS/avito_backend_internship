@@ -16,7 +16,7 @@ type Server struct {
 }
 
 func NewServer(cfgPath string) (*Server, error){
-  config, err := NewConfig(cfgPath)
+  config, err := CreateConfig(cfgPath)
 	if err != nil {
 		return nil, err
 	}
@@ -31,8 +31,8 @@ func NewServer(cfgPath string) (*Server, error){
 	}
   return &Server {
     db: db,
-    config: config
-    router: mux.NewRouter()
+    config: config,
+    router: mux.NewRouter(),
   }, nil
 }
 
@@ -52,5 +52,5 @@ func (serv *Server) setRouter() {
 }
 
 func (serv *Server) getAddr() string {
-  return fmt.Sprintf("%s:%s", s.config.Address, s.config.Port)
+  return fmt.Sprintf("%s:%s", serv.config.Address, serv.config.Port)
 }

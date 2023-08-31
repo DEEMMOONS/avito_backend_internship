@@ -1,4 +1,4 @@
-module github.com/DEEMMOONS/avito_backend_internship
+module github.com/DEEMMOONS/avito_backend_internship/tree/develop
 
 go 1.18
 
