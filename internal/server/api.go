@@ -1,7 +1,7 @@
 package server
 
 import (
-  "github.com/DEEMMOONS/avito_backend_internship/tree/main/internal/database"
+  "github.com/DEEMMOONS/avito_backend_internship/internal/database"
   "net/http"
   "os"
   "fmt"
